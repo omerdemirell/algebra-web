@@ -1,0 +1,183 @@
+---
+import { getImage } from 'astro:assets';
+import { t } from '../../i18n/ui';
+import { type Locale } from '../../i18n/locales';
+import { images } from '../../lib/images';
+const { locale = 'tr' } = Astro.props as { locale?: Locale };
+const copy = t(locale);
+const photosByContent = [images.hero, images.software, images.datacenter, images.solar, images.engineering];
+const slideOrder = [0, 3, 2, 1, 4] as const;
+const slides = slideOrder.map((contentIndex) => ({
+  contentIndex,
+  photo: photosByContent[contentIndex]!,
+  lines: copy.hero[contentIndex]!,
+  description: copy.heroDesc[contentIndex]!,
+  label: copy.slideLabels[contentIndex]!,
+}));
+const widths = [640, 960, 1280, 1600, 2200];
+const assets = await Promise.all(
+  slides.map(async ({ photo, contentIndex }) => {
+    const sourceWidths = [...new Set(widths.map((width) => Math.min(width, photo.width)))];
+    const sizes = await Promise.all(
+      sourceWidths.map((width) =>
+        getImage({ src: photo, width, format: 'webp', quality: contentIndex >= 2 ? 90 : 75 }),
+      ),
+    );
+    return {
+      src: sizes[2]!.src,
+      srcset: sizes.map((s, i) => `${s.src} ${sourceWidths[i]}w`).join(', '),
+    };
+  }),
+);
+---
+
+<section
+  class="hero-slider"
+  id="home"
+  aria-roledescription="slayt gösterisi"
+  aria-label={copy.eyebrow}
+  tabindex="0"
+  data-slider
+>
+  <div class="hero-slides">
+    {slides.map(({ contentIndex, lines, description, photo }, index) => (
+      <article
+        class:list={['hero-slide', { 'is-active': index === 0, 'hero-slide--digital': contentIndex === 1 }]}
+        aria-hidden={index !== 0}
+        inert={index !== 0}
+        data-slide
+        data-slide-index={index}
+      >
+        <img
+          class="hero-photo"
+          src={
+            index === 0
+              ? assets[index]!.src
+              : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
+          }
+          srcset={index === 0 ? assets[index]!.srcset : undefined}
+          data-src={assets[index]!.src}
+          data-srcset={assets[index]!.srcset}
+          sizes="100vw"
+          alt=""
+          width={photo.width}
+          height={photo.height}
+          fetchpriority={index === 0 ? 'high' : 'low'}
+          loading={index === 0 ? 'eager' : 'lazy'}
+        />
+        <div class="hero-shade"></div>
+        <div class="container hero-content">
+          {index === 0 ? (
+            <h1>
+              <span>{lines[0]}</span>
+              <span class="hero-title-second">{lines[1]}</span>
+            </h1>
+          ) : (
+            <h2>
+              <span>{lines[0]}</span>
+              <span class="hero-title-second">{lines[1]}</span>
+            </h2>
+          )}
+          <p>{description}</p>
+        </div>
+      </article>
+    ))}
+  </div>
+  <div class="slider-side-controls" role="group" aria-label={copy.eyebrow}>
+    <button class="slider-control slider-control--prev" data-prev aria-label={copy.prev}>
+      <svg aria-hidden="true" viewBox="0 0 24 40" fill="none">
+        <path d="M21 2 3 20l18 18" />
+      </svg>
+    </button>
+    <button class="slider-control slider-control--next" data-next aria-label={copy.next}>
+      <svg aria-hidden="true" viewBox="0 0 24 40" fill="none">
+        <path d="m3 2 18 18L3 38" />
+      </svg>
+    </button>
+  </div>
+  <div class="hero-bottom">
+    <a class="scroll-hint" href="#services" aria-label={copy.scroll}>
+      <span>{copy.scroll}</span>
+      <span class="scroll-arrow" aria-hidden="true">
+        ↓
+      </span>
+    </a>
+  </div>
+  <span class="sr-only slide-announcement" aria-live="off" aria-atomic="true">
+    {slides[0]!.label}
+  </span>
+</section>
+<script>
+  import '../../lib/slider';
+</script>
+<style>
+  .hero-slide--digital .hero-photo {
+    object-position: 52% 55%;
+  }
+  .hero-slide--digital .hero-shade {
+    background: linear-gradient(
+      90deg,
+      rgba(3, 7, 16, 0.97) 0%,
+      rgba(3, 7, 16, 0.95) 22%,
+      rgba(3, 7, 16, 0.91) 37%,
+      rgba(3, 7, 16, 0.72) 50%,
+      rgba(3, 7, 16, 0.32) 62%,
+      rgba(3, 7, 16, 0) 78%
+    );
+  }
+  @media (min-width: 761px) and (max-width: 1199px) {
+    .hero-slide--digital .hero-photo {
+      object-position: 50% 52%;
+    }
+    .hero-slide--digital .hero-shade {
+      background: linear-gradient(
+        90deg,
+        rgba(3, 7, 16, 0.97) 0%,
+        rgba(3, 7, 16, 0.95) 32%,
+        rgba(3, 7, 16, 0.86) 49%,
+        rgba(3, 7, 16, 0.5) 68%,
+        rgba(3, 7, 16, 0) 93%
+      );
+    }
+  }
+  @media (max-width: 760px) {
+    .hero-slide--digital .hero-photo {
+      object-position: 76% center;
+    }
+    .hero-slide--digital .hero-shade {
+      background: linear-gradient(
+        90deg,
+        rgba(3, 7, 16, 0.98) 0%,
+        rgba(3, 7, 16, 0.96) 35%,
+        rgba(3, 7, 16, 0.88) 58%,
+        rgba(3, 7, 16, 0.35) 80%,
+        rgba(3, 7, 16, 0) 100%
+      );
+    }
+    .hero-slide:nth-child(2) .hero-photo {
+      object-position: 85% center;
+    }
+    .hero-slide:nth-child(3) .hero-photo {
+      object-position: 70% center;
+    }
+    .hero-slide:nth-child(5) .hero-photo {
+      object-position: 76% center;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-arrow {
+      animation: hero-scroll-cue 1.8s ease-in-out infinite;
+    }
+  }
+  @keyframes hero-scroll-cue {
+    0%,
+    100% {
+      transform: translateY(-3px);
+      opacity: 0.5;
+    }
+    55% {
+      transform: translateY(4px);
+      opacity: 1;
+    }
+  }
+</style>

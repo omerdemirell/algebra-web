@@ -1,0 +1,198 @@
+---
+import Icon from '../ui/Icon.astro';
+interface Props {
+  type: 'quote' | 'career' | 'partner';
+}
+const { type } = Astro.props;
+const isCareer = type === 'career';
+const careerTopic = Astro.url.pathname.includes('/staj-programi/') ? 'internship' : 'general';
+const locale = Astro.url.pathname.split('/')[1] || 'tr';
+const consentCopy: Record<string, string> = {
+  tr: 'okudum.', en: 'I have read it.', ar: 'قرأتُها.', de: 'habe ich gelesen.',
+  fr: 'je l’ai lue.', 'zh-CN': '我已阅读。', ja: '確認しました。',
+  ru: 'я ознакомился(-ась).', it: 'ho letto.', es: 'la he leído.',
+};
+const careerButton: Record<string, string> = {
+  tr: 'Başvuruyu Gönder', en: 'Send Application', ar: 'إرسال الطلب', de: 'Bewerbung senden',
+  fr: 'Envoyer la candidature', 'zh-CN': '提交申请', ja: '応募を送信',
+  ru: 'Отправить заявку', it: 'Invia candidatura', es: 'Enviar solicitud',
+};
+---
+
+<section class="form-section" aria-labelledby="form-title">
+  <span class="eyebrow">
+    <i></i>
+    {isCareer ? 'BAŞVURU HAZIRLIĞI' : 'İHTİYACINIZI TANIMLAYIN'}
+  </span>
+  <h2 id="form-title">
+    {isCareer ? 'Birlikte üretebileceklerimizi düşünelim.' : 'Bir konuşmayla başlayalım.'}
+  </h2>
+  <form
+    data-contact-form
+    data-type={type}
+    data-career-topic={careerTopic}
+    data-invalid-message="Form doğrulanamadı."
+  >
+    <div class="form-grid">
+      <div class="field">
+        <label for="full-name">
+          Ad Soyad <span>*</span>
+        </label>
+        <input
+          id="full-name"
+          name="name"
+          autocomplete="name"
+          required
+          minlength="2"
+          maxlength="120"
+          placeholder="Adınız ve soyadınız"
+        />
+      </div>
+      <div class="field">
+        <label for="email">
+          E-posta <span>*</span>
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          maxlength="254"
+          placeholder="ornek@sirketiniz.com"
+        />
+      </div>
+      <div class="field">
+        <label for="company">{isCareer ? 'Uzmanlık / Bölüm' : 'Şirket / Kurum'}</label>
+        <input
+          id="company"
+          name="company"
+          autocomplete={isCareer ? 'off' : 'organization'}
+          maxlength="160"
+          placeholder={isCareer ? 'Çalışma alanınız' : 'Kurum adı'}
+        />
+      </div>
+      <div class="field">
+        <label for="interest">
+          İlgi Alanı <span>*</span>
+        </label>
+        <select name="interest" id="interest" required>
+          <option value="">Bir alan seçin</option>
+          <option value="Yazılım ve Dijital Teknolojiler">Yazılım ve Dijital Teknolojiler</option>
+          <option value="Bilişim ve Veri Merkezi">Bilişim ve Veri Merkezi</option>
+          <option value="Enerji ve Yenilenebilir Enerji">Enerji ve Yenilenebilir Enerji</option>
+          <option value="Mühendislik ve Danışmanlık">Mühendislik ve Danışmanlık</option>
+          <option value="İş Birliği">İş Birliği</option>
+          <option value="Diğer">Diğer</option>
+        </select>
+      </div>
+      <div class="field full-width">
+        <label for="message">
+          {isCareer ? 'Kısa Tanıtım' : 'İhtiyacınız / Mesajınız'} <span>*</span>
+        </label>
+        <textarea
+          name="message"
+          id="message"
+          rows="5"
+          required
+          minlength="20"
+          maxlength="5000"
+          aria-describedby="message-help"
+          placeholder={
+            isCareer
+              ? 'İlgi alanlarınızı ve deneyiminizi paylaşın.'
+              : 'Mevcut durumunuzu ve hedeflerinizi kısaca anlatın.'
+          }
+        ></textarea>
+        <small id="message-help">
+          20–5000 karakter. Hassas bilgi, parola veya özel nitelikli kişisel veri paylaşmayın.
+        </small>
+      </div>
+    </div>
+    <div class="honey-field" aria-hidden="true">
+      <label for="website">Bu alanı boş bırakın</label>
+      <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" />
+    </div>
+    <label class="checkbox-field">
+      <input type="checkbox" name="notice" required />
+      <span>
+        <a href="/gizlilik/">Gizlilik ve veri işleme bilgilendirmesini</a>
+        <span data-i18n-ignore>{consentCopy[locale] || consentCopy.tr}</span> <span>*</span>
+      </span>
+    </label>
+    <button class="button" type="submit" disabled>
+      {isCareer ? <span data-i18n-ignore>{careerButton[locale] || careerButton.tr}</span> : type === 'partner' ? 'İş Birliği Başvurusu' : 'Teklif Talebi'}
+      <Icon name="check" size={18} />
+    </button>
+    <p class="form-result" role="status" aria-live="polite" tabindex="-1"></p>
+  </form>
+</section>
+<script>
+  const formMessages: Record<string, { sending: string; sent: string; error: string; unavailable: string }> = {
+    tr: { sending: 'Gönderiliyor…', sent: 'Mesajınız gönderildi. Teşekkür ederiz.', error: 'Mesaj gönderilemedi. Lütfen tekrar deneyin veya info@algebrateknoloji.com adresine e-posta gönderin.', unavailable: 'Form gönderimi şu anda etkin değil. Lütfen info@algebrateknoloji.com adresine e-posta gönderin.' },
+    en: { sending: 'Sending…', sent: 'Your message has been sent. Thank you.', error: 'Your message could not be sent. Please try again or email info@algebrateknoloji.com.', unavailable: 'Form submission is not available yet. Please email info@algebrateknoloji.com.' },
+    ar: { sending: 'جارٍ الإرسال…', sent: 'تم إرسال رسالتك. شكرًا لك.', error: 'تعذر إرسال رسالتك. يرجى المحاولة مجددًا أو مراسلتنا على info@algebrateknoloji.com.', unavailable: 'إرسال النماذج غير متاح حاليًا. يرجى مراسلتنا على info@algebrateknoloji.com.' },
+    de: { sending: 'Wird gesendet…', sent: 'Ihre Nachricht wurde gesendet. Vielen Dank.', error: 'Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder schreiben Sie an info@algebrateknoloji.com.', unavailable: 'Das Absenden des Formulars ist derzeit nicht verfügbar. Bitte schreiben Sie an info@algebrateknoloji.com.' },
+    fr: { sending: 'Envoi en cours…', sent: 'Votre message a été envoyé. Merci.', error: 'Votre message n’a pas pu être envoyé. Réessayez ou écrivez à info@algebrateknoloji.com.', unavailable: 'L’envoi du formulaire n’est pas encore disponible. Veuillez écrire à info@algebrateknoloji.com.' },
+    'zh-CN': { sending: '正在发送…', sent: '您的消息已发送。谢谢。', error: '消息发送失败。请重试或发送邮件至 info@algebrateknoloji.com。', unavailable: '表单提交暂不可用。请发送邮件至 info@algebrateknoloji.com。' },
+    ja: { sending: '送信中…', sent: 'メッセージを送信しました。ありがとうございます。', error: '送信できませんでした。再試行するか、info@algebrateknoloji.com までメールしてください。', unavailable: '現在、フォームからの送信はご利用いただけません。info@algebrateknoloji.com までメールでご連絡ください。' },
+    ru: { sending: 'Отправка…', sent: 'Ваше сообщение отправлено. Спасибо.', error: 'Не удалось отправить сообщение. Повторите попытку или напишите на info@algebrateknoloji.com.', unavailable: 'Отправка формы пока недоступна. Напишите на info@algebrateknoloji.com.' },
+    it: { sending: 'Invio in corso…', sent: 'Il messaggio è stato inviato. Grazie.', error: 'Impossibile inviare il messaggio. Riprova o scrivi a info@algebrateknoloji.com.', unavailable: 'L’invio del modulo non è ancora disponibile. Scrivi a info@algebrateknoloji.com.' },
+    es: { sending: 'Enviando…', sent: 'Tu mensaje se ha enviado. Gracias.', error: 'No se pudo enviar el mensaje. Vuelve a intentarlo o escribe a info@algebrateknoloji.com.', unavailable: 'El envío del formulario aún no está disponible. Escribe a info@algebrateknoloji.com.' },
+  };
+  document.querySelectorAll<HTMLFormElement>('[data-contact-form]').forEach((form) => {
+    const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+    if (import.meta.env.PROD) {
+      const result = form.querySelector<HTMLElement>('.form-result')!;
+      result.textContent = (formMessages[document.documentElement.lang] || formMessages.tr).unavailable;
+      result.classList.add('visible');
+      return;
+    }
+    button.disabled = false;
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const result = form.querySelector<HTMLElement>('.form-result')!;
+      if (!form.reportValidity()) return;
+      const data = new FormData(form);
+      if (data.get('website')) {
+        result.textContent = form.dataset.invalidMessage || '';
+        return;
+      }
+      {
+        const messages = formMessages[document.documentElement.lang] || formMessages.tr;
+        result.textContent = messages.sending;
+        result.classList.add('visible');
+        button.disabled = true;
+        try {
+          const response = await fetch('/api/contact.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: form.dataset.type,
+              careerTopic: form.dataset.careerTopic,
+              name: data.get('name'),
+              email: data.get('email'),
+              company: data.get('company'),
+              interest: data.get('interest'),
+              message: data.get('message'),
+              website: data.get('website'),
+              notice: data.get('notice') === 'on',
+            }),
+          });
+          const payload = response.headers.get('content-type')?.includes('application/json')
+            ? await response.json()
+            : null;
+          if (!response.ok || payload?.ok !== true) throw new Error('Delivery failed');
+          result.textContent = messages.sent;
+          form.reset();
+        } catch {
+          result.textContent = messages.error;
+        } finally {
+          button.disabled = false;
+        }
+      }
+      result.classList.add('visible');
+      result.focus();
+    });
+  });
+</script>

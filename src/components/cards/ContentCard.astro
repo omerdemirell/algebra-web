@@ -1,0 +1,42 @@
+---
+import { Image } from 'astro:assets';
+import { imageFor, imageFocusFor } from '../../lib/images';
+import Icon from '../ui/Icon.astro';
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  href: string;
+  index?: number;
+  tag?: string;
+  compact?: boolean;
+}
+const { title, description, image, href, index, tag, compact = false } = Astro.props;
+---
+
+<a class:list={['content-card', { compact }]} href={href}>
+  {image && (
+    <div class="card-image">
+      <Image
+        src={imageFor(image)}
+        alt=""
+        widths={[400, 640, 900]}
+        sizes="(max-width: 600px) 100vw, (max-width: 1000px) 50vw, 33vw"
+        format="webp"
+        quality={imageFocusFor(image) ? 90 : undefined}
+        style={imageFocusFor(image) ? `object-position: ${imageFocusFor(image)}` : undefined}
+        loading="lazy"
+        width={700}
+      />
+    </div>
+  )}
+  <div class="card-body">
+    {tag && <span class="card-tag">{tag}</span>}
+    {index !== undefined && <span class="card-number">{String(index + 1).padStart(2, '0')}</span>}
+    <h3>{title}</h3>
+    {description && <p>{description}</p>}
+    <span class="card-arrow">
+      <Icon name="diagonal" />
+    </span>
+  </div>
+</a>

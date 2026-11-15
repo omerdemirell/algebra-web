@@ -1,0 +1,64 @@
+---
+import { Image } from 'astro:assets';
+import { imageFor, imageFocusFor } from '../../lib/images';
+import KnowledgeField from './KnowledgeField.astro';
+interface Props {
+  title: string;
+  eyebrow: string;
+  description: string;
+  image?: string;
+  slug?: string;
+  compact?: boolean;
+  knowledgeField?: boolean;
+}
+const { title, eyebrow, description, image = 'hero', slug, compact = false, knowledgeField = false } = Astro.props;
+const parent = slug?.includes('/') ? slug.split('/')[0] : undefined;
+const parentTitles: Record<string, string> = {
+  hizmetler: 'Hizmetler',
+  cozumler: 'Çözümler',
+  kurumsal: 'Kurumsal',
+  sektorler: 'Sektörler',
+  'insan-kaynaklari': 'İnsan Kaynakları',
+  'bilgi-merkezi': 'Bilgi Merkezi',
+  iletisim: 'İletişim',
+};
+---
+
+<section class:list={['page-hero', { compact, 'page-hero--knowledge': knowledgeField }]}>
+  {knowledgeField ? <KnowledgeField /> : <Image
+    class="page-hero-image"
+    src={imageFor(image)}
+    alt=""
+    widths={[640, 1200, 1800]}
+    sizes="100vw"
+    format="webp"
+    quality={imageFocusFor(image) || image.endsWith('Sector') ? 90 : undefined}
+    style={imageFocusFor(image) ? `object-position: ${imageFocusFor(image)}` : undefined}
+    width={1800}
+    loading="eager"
+    fetchpriority="high"
+  />}
+  <div class="page-hero-shade"></div>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Sayfa yolu">
+      <a href="/">Ana Sayfa</a>
+      <span>/</span>
+      {parent && (
+        <>
+          <a href={`/${parent}/`}>{parentTitles[parent] || parent}</a>
+          <span>/</span>
+        </>
+      )}
+      <span aria-current="page">{eyebrow}</span>
+    </nav>
+    <span class="eyebrow">
+      <i></i>
+      {eyebrow}
+    </span>
+    <h1>{title}</h1>
+    <p>{description}</p>
+  </div>
+  <span class="page-hero-index" aria-hidden="true">
+    ALGEBRA / TECHNOLOGY FOR TOMORROW
+  </span>
+</section>

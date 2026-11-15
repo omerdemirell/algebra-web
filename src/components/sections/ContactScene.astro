@@ -1,0 +1,83 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '../ui/Icon.astro';
+import { contactContent as copy } from '../../data/contact';
+import backdrop from '../../assets/contact-building.png';
+import '../../styles/contact.css';
+---
+
+<section class="contact-scene" aria-labelledby="contact-heading">
+  <Image
+    class="contact-scene__image"
+    src={backdrop}
+    alt="Algebra Teknoloji tabelalı bina, gün batımı ve binanın çevresindeki kırmızı ışık yörüngeleri"
+    widths={[640, 960, 1440, 1920, 2560]}
+    sizes="(max-aspect-ratio: 1671/941) 178dvh, 100vw"
+    format="webp"
+    quality={85}
+    width={1920}
+    loading="eager"
+    fetchpriority="high"
+  />
+  <div class="contact-scene__scrim" aria-hidden="true"></div>
+  <div class="contact-scene__inner">
+    <div class="contact-scene__content">
+      <p class="contact-scene__eyebrow">
+        <span></span>İLETİŞİM<i></i>
+        {copy.eyebrow}
+      </p>
+      <h1 id="contact-heading">
+        <span>{copy.title[0]}</span> <span>{copy.title[1]}</span>
+      </h1>
+      <p class="contact-scene__intro">{copy.description}</p>
+      <address class="contact-scene__channels">
+        {copy.channels.map((channel) => (
+          <div class="contact-channel">
+            <span class="contact-channel__icon">
+              <Icon name={channel.icon} size={19} />
+            </span>
+            <div>
+              <span class="contact-channel__label">{channel.label}</span>
+              {channel.value && channel.href ? (
+                <a
+                  href={channel.href}
+                  dir="ltr"
+                  data-i18n-ignore
+                  target={channel.href.startsWith('https://') ? '_blank' : undefined}
+                  rel={channel.href.startsWith('https://') ? 'noopener noreferrer' : undefined}
+                >
+                  {channel.value}
+                </a>
+              ) : (
+                <span class="contact-channel__value">{channel.value || channel.pending}</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </address>
+      <div class="contact-scene__actions">
+        {copy.actions.map((action) => (
+          <a
+            class:list={['contact-action', { 'contact-action--primary': action.primary }]}
+            href={action.href}
+          >
+            {action.label}
+            <Icon name="diagonal" size={18} />
+          </a>
+        ))}
+      </div>
+    </div>
+    <div class="contact-scene__caption" aria-hidden="true">
+      <span>ALGEBRA TEKNOLOJİ</span>
+      <i></i>
+      <span>İLETİŞİM</span>
+    </div>
+  </div>
+  <footer class="contact-scene__footer">
+    <span>© {new Date().getFullYear()} Algebra Teknoloji</span>
+    <nav aria-label="Yasal bilgilendirme">
+      <a href="/gizlilik/">Gizlilik ve KVKK</a>
+      <a href="/cerez-politikasi/">Çerez Politikası</a>
+    </nav>
+  </footer>
+</section>

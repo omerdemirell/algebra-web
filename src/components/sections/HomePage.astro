@@ -1,0 +1,208 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HeroSlider from '../slider/HeroSlider.astro';
+import SectionHeading from './SectionHeading.astro';
+import CTASection from './CTASection.astro';
+import ContentCard from '../cards/ContentCard.astro';
+import BetawiseGlobe from '../three/BetawiseGlobe';
+import Icon from '../ui/Icon.astro';
+import BackgroundEffect from '../ui/BackgroundEffect.astro';
+import { Image } from 'astro:assets';
+import { images, imageFocusFor } from '../../lib/images';
+import { t } from '../../i18n/ui';
+import { type Locale } from '../../i18n/locales';
+import { serviceGroups, articles } from '../../data/site';
+const { locale = 'tr' } = Astro.props as { locale?: Locale };
+const copy = t(locale);
+const solutionSlugs = [
+  'kurumsal-dijital-donusum',
+  'is-surekliligi',
+  'surdurulebilir-enerji-donusumu',
+];
+---
+
+<BaseLayout locale={locale} home={true}>
+  <HeroSlider locale={locale} />
+  <section class="expertise-section section-space" id="services">
+    <div class="container">
+      <SectionHeading
+        eyebrow={copy.expertise}
+        title={copy.expertiseTitle}
+        accent={copy.expertiseAccent}
+        description={copy.expertiseDesc}
+        href="/hizmetler/"
+        linkText={copy.allServices}
+      />
+      <div class="expertise-grid">
+        {serviceGroups.map((g, i) => (
+          <a class="expertise-card" href={`/hizmetler/#${g.id}`}>
+            <Image
+              src={images[g.image]}
+              widths={[240, 400, 650]}
+              sizes="(max-width: 760px) 45vw, 24vw"
+              alt=""
+              format="webp"
+              quality={i === 0 ? 75 : 90}
+              width={650}
+              height={i === 0 ? 900 : undefined}
+              fit={i === 0 ? 'cover' : undefined}
+              style={i > 0 ? `object-position: ${imageFocusFor(g.image)}` : undefined}
+              loading="lazy"
+            />
+            {i === 1 && <BackgroundEffect mode="particles" />}
+            <div class="expertise-overlay"></div>
+            <span class="expertise-index">0{i + 1}</span>
+            <div class="expertise-card-content">
+              <Icon name={['code', 'server', 'sun', 'layers'][i]} size={29} />
+              <h3>{copy.groups[i]}</h3>
+              <p>{copy.groupDesc[i]}</p>
+              <span class="expertise-arrow">
+                <Icon name="diagonal" />
+              </span>
+            </div>
+          </a>
+        ))}
+      </div>
+      <div class="expertise-footnote">
+        <span class="status-dot"></span>
+        <span>{copy.principles.join(' · ')}</span>
+        <span class="fine-line"></span>
+        <span>ALGEBRA ECOSYSTEM</span>
+      </div>
+    </div>
+  </section>
+  <section class="solutions-section section-space" id="solutions">
+    <BackgroundEffect mode="arc" />
+    <div class="container">
+      <SectionHeading
+        eyebrow={copy.solutionsEye}
+        title={copy.solutionsTitle}
+        href="/cozumler/"
+        linkText={copy.allSolutions}
+      />
+      <div class="solutions-grid">
+        {copy.solutionNames.map((title, i) => (
+          <a class="solution-card" href={`/cozumler/${solutionSlugs[i]}/`}>
+            <span class="solution-icon">
+              <Icon name={['layers', 'shield', 'sun'][i]} size={32} />
+            </span>
+            <span class="solution-number">0{i + 1}</span>
+            <h3>{title}</h3>
+            <p>{copy.solutionDesc[i]}</p>
+            <span class="solution-link">
+              Çözümü keşfedin
+              <Icon name="arrow" size={18} />
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+  <section class="about-section section-space" id="about">
+    <div class="container about-grid">
+      <div class="about-visual">
+        <Image
+          src={images.engineering}
+          alt=""
+          widths={[500, 850, 1200]}
+          quality={90}
+          sizes="(max-width: 800px) 100vw, 45vw"
+          format="webp"
+          width={900}
+          style={`object-position: ${imageFocusFor('engineering')}`}
+          loading="lazy"
+        />
+        <div class="about-visual-overlay"></div>
+        <span class="visual-corner corner-one"></span>
+        <span class="visual-corner corner-two"></span>
+        <div class="about-visual-label">
+          <svg class="about-wordmark" viewBox="160 365 760 210" role="img" aria-label="Algebra">
+            <image href="/brand/algebra-remove.png" width="1672" height="941" />
+          </svg>
+          <span>CONNECTED THINKING.</span>
+        </div>
+        <div class="visual-cross">+</div>
+      </div>
+      <div class="about-copy">
+        <SectionHeading
+          eyebrow={copy.aboutEye}
+          title={copy.aboutTitle}
+          description={copy.aboutDesc}
+        />
+        <div class="principles">
+          {copy.principles.map((item, i) => (
+            <div>
+              <span>0{i + 1}</span>
+              <span>{item}</span>
+              <Icon name="check" size={16} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="globe-section" id="globe" aria-labelledby="world-title">
+    <div class="globe-grid container">
+      <div class="globe-copy">
+        <span class="eyebrow">
+          <i></i>
+          {copy.globeEye}
+        </span>
+        <h2 id="world-title">
+          {copy.globeTitle.split('\n').map((line) => (
+            <span class="line">{line}</span>
+          ))}
+        </h2>
+        <p>{copy.globeDesc}</p>
+      </div>
+      <div class="globe-visual">
+        <BetawiseGlobe
+          client:visible={{ rootMargin: '1000px 0px' }}
+          label={copy.globeFallback}
+        />
+      </div>
+    </div>
+  </section>
+  <section class="insights-section section-space" id="insights">
+    <div class="container">
+      <SectionHeading
+        eyebrow={copy.insightEye}
+        title={copy.insightTitle}
+        href="/bilgi-merkezi/"
+        linkText="Bilgi Merkezine Gidin"
+      />
+      <div class="insights-crt-stage">
+        <BackgroundEffect mode="crt" />
+        <span class="insights-crt-caption" aria-hidden="true" data-i18n-ignore>ALGEBRA / SYSTEM INTELLIGENCE</span>
+      </div>
+      <div class="cards-grid">
+        {articles.map((p, i) => (
+          <ContentCard
+            title={copy.articles[i]!}
+            image={p.image}
+            href={`/${p.slug}/`}
+            tag={copy.articleTags[i]}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+  <section class="career-section" id="careers">
+    <BackgroundEffect mode="laser" />
+    <div class="container career-inner">
+      <div>
+        <span class="eyebrow">
+          <i></i>
+          {copy.careerEye}
+        </span>
+        <h2>{copy.careerTitle}</h2>
+        <p>{copy.careerDesc}</p>
+      </div>
+      <a class="outline-button" href="/insan-kaynaklari/">
+        Kariyer Alanını Keşfedin
+        <Icon name="diagonal" size={20} />
+      </a>
+    </div>
+  </section>
+  <CTASection locale={locale} />
+</BaseLayout>

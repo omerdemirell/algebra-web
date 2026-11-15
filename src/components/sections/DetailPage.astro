@@ -1,0 +1,156 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../hero/PageHero.astro';
+import CTASection from './CTASection.astro';
+import FAQAccordion from '../ui/FAQAccordion.astro';
+import ContactForm from '../forms/ContactForm.astro';
+import ContentCard from '../cards/ContentCard.astro';
+import {
+  services,
+  solutions,
+  corporate,
+  sectors,
+  careers,
+  articles,
+  type DetailPage,
+} from '../../data/site';
+interface Props {
+  page: DetailPage;
+}
+const { page } = Astro.props;
+const peers = {
+  service: services,
+  solution: solutions,
+  corporate,
+  sector: sectors,
+  career: careers,
+  article: articles,
+  legal: [],
+}[page.kind]
+  .filter((p) => p.slug !== page.slug && (page.category ? p.category === page.category : true))
+  .slice(0, 3);
+const schema: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Ana Sayfa',
+          item: new URL('/', Astro.site).href,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: page.title,
+          item: new URL(`/${page.slug}/`, Astro.site).href,
+        },
+      ],
+    },
+    ...(page.kind === 'service'
+      ? [
+          {
+            '@type': 'Service',
+            name: page.title,
+            description: page.description,
+            provider: { '@type': 'Organization', name: 'Algebra Teknoloji' },
+            url: new URL(`/${page.slug}/`, Astro.site).href,
+          },
+        ]
+      : []),
+    ...(page.kind === 'article'
+      ? [
+          {
+            '@type': 'Article',
+            headline: page.title,
+            description: page.description,
+            author: { '@type': 'Organization', name: 'Algebra Teknoloji' },
+            publisher: { '@type': 'Organization', name: 'Algebra Teknoloji' },
+            mainEntityOfPage: new URL(`/${page.slug}/`, Astro.site).href,
+          },
+        ]
+      : []),
+  ],
+};
+---
+
+<BaseLayout title={page.title} description={page.description} schema={schema}>
+  <PageHero
+    title={page.title}
+    description={page.description}
+    eyebrow={page.eyebrow}
+    image={page.image}
+    slug={page.slug}
+  />
+  <div class:list={['container detail-layout', { 'article-layout': page.kind === 'article' }]}>
+    <aside class="detail-sidebar">
+      <span class="eyebrow">BU SAYFADA</span>
+      <nav aria-label="İçindekiler">
+        {page.sections.map((section, index) => (
+          <a href={`#section-${index}`}>
+            <span>0{index + 1}</span>
+            {section.title}
+          </a>
+        ))}
+        {page.faq && (
+          <a href="#faq">
+            <span>+</span>Sık Sorulan Sorular
+          </a>
+        )}
+      </nav>
+      <a class="sidebar-cta" href="/iletisim/teklif-talebi/">
+        İhtiyacınızı birlikte değerlendirelim.<span>Teklif Talebi ↗</span>
+      </a>
+    </aside>
+    <div class="detail-content">
+      {page.sections.map((section, index) => (
+        <section
+          class:list={[
+            'editorial-section',
+            { 'architecture-section': page.kind === 'solution' && index === 2 },
+          ]}
+          id={`section-${index}`}
+        >
+          <span class="section-numeral">0{index + 1} /</span>
+          <h2>{section.title}</h2>
+          <p>{section.body}</p>
+          {section.items && (
+            <ul class:list={['scope-list', { 'architecture-items': page.kind === 'solution' }]}>
+              {section.items.map((item, i) => (
+                <li>
+                  <span>{String(i + 1).padStart(2, '0')}</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ))}
+      {page.faq && (
+        <section id="faq" class="editorial-section">
+          <h2>Sık sorulan sorular</h2>
+          <FAQAccordion items={page.faq} />
+        </section>
+      )}
+      {page.form && <ContactForm type={page.form} />}
+    </div>
+  </div>
+  {peers.length > 0 && (
+    <section class="related-section section-space">
+      <div class="container">
+        <span class="eyebrow">
+          <i></i>BAĞLANTILI ALANLAR
+        </span>
+        <h2>Birlikte düşünün.</h2>
+        <div class="cards-grid">
+          {peers.map((p) => (
+            <ContentCard title={p.title} description={p.description} href={`/${p.slug}/`} compact />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+  <CTASection />
+</BaseLayout>

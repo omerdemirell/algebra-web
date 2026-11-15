@@ -1,0 +1,75 @@
+---
+import Icon from '../ui/Icon.astro';
+import { t } from '../../i18n/ui';
+import { homePath, navPath, type Locale } from '../../i18n/locales';
+import { companyContact } from '../../data/contact';
+const { locale = 'tr' } = Astro.props as { locale: Locale };
+const copy = t(locale);
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-main">
+      <div>
+        <a href={homePath(locale)} class="brand footer-brand" aria-label="Algebra Teknoloji">
+          <img
+            src="/brand/algebra-display.webp"
+            alt="Algebra Teknoloji"
+            width="1672"
+            height="941"
+            loading="lazy"
+          />
+        </a>
+        <p>{copy.footerDesc}</p>
+        <span class="footer-domain">
+          algebrateknoloji.com <Icon name="diagonal" size={13} />
+        </span>
+      </div>
+      <div>
+        <span class="footer-label">{copy.nav[1]}</span>
+        {[1, 4, 5, 6].map((i) => (
+          <a href={navPath(locale, i)}>{copy.nav[i]}</a>
+        ))}
+      </div>
+      <div>
+        <span class="footer-label">{copy.nav[2]}</span>
+        {copy.groups.map((g, i) => (
+          <a href={`/hizmetler/#${['yazilim', 'bilisim', 'enerji', 'kurumsal'][i]}`}>{g}</a>
+        ))}
+      </div>
+      <div>
+        <span class="footer-label">{copy.nav[7]}</span>
+        <a href={`tel:${companyContact.telephone}`} dir="ltr">
+          {companyContact.phone}
+        </a>
+        <a href={`mailto:${companyContact.email}`} dir="ltr">
+          {companyContact.email}
+        </a>
+        <a href={companyContact.mapUrl} target="_blank" rel="noopener noreferrer" dir="ltr">
+          {companyContact.address}
+        </a>
+        <a href={navPath(locale, 7)}>
+          {copy.contactAction}
+          <Icon name="diagonal" size={14} />
+        </a>
+        <a href="/iletisim/is-birligi/">
+          {copy.quote}
+          <Icon name="diagonal" size={14} />
+        </a>
+        <a class="back-top" href="#top">
+          {copy.top} ↑
+        </a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>
+        © {new Date().getFullYear()} Algebra Teknoloji. {copy.rights}
+      </span>
+      <div>
+        <a href="/gizlilik/">{copy.privacy}</a>
+        <a href="/cerez-politikasi/">{copy.cookies}</a>
+      </div>
+      <span class="footer-statement">ALGEBRA · TECHNOLOGY FOR TOMORROW</span>
+    </div>
+  </div>
+</footer>

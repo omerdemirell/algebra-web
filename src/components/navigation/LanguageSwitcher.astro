@@ -1,0 +1,239 @@
+---
+import { localeRegistry, localePath, languageName, type Locale } from '../../i18n/locales';
+import { t } from '../../i18n/ui';
+const { locale } = Astro.props as { locale: Locale; home: boolean };
+const selectedName = languageName(locale, locale);
+const preferred = ['tr', 'ar', 'zh-CN', 'en'] as const;
+const options = [...localeRegistry].sort((a, b) => {
+  const rank = (code: Locale) => {
+    const index = preferred.findIndex((item) => item === code);
+    return index === -1 ? preferred.length + localeRegistry.findIndex(([value]) => value === code) : index;
+  };
+  return rank(a[0]) - rank(b[0]);
+}).map(([code]) => ({
+  code,
+  name: languageName(code, locale),
+}));
+const copy = t(locale);
+const currentPage =
+  Astro.url.pathname === '/404/' ||
+  Astro.url.pathname === '/404.html' ||
+  Astro.response.status === 404
+    ? '/'
+    : Astro.url.pathname;
+const countries: Record<string, string> = {
+  tr: 'tr',
+  en: 'gb',
+  ar: 'sa',
+  fr: 'fr',
+  de: 'de',
+  es: 'es',
+  'zh-CN': 'cn',
+  ja: 'jp',
+  ru: 'ru',
+  it: 'it',
+};
+---
+
+<details class="language-picker modern-language-picker">
+  <summary title={selectedName} dir="ltr">
+    <img
+      class="language-flag"
+      src={`/flags/${countries[locale]}.svg`}
+      width="24"
+      height="16"
+      alt=""
+    />
+    <span id="current-language-name" class="selected-language-name" data-i18n-ignore>
+      {selectedName}
+    </span>
+    <span id="choose-language-label" class="sr-only">
+      {copy.language}
+    </span>
+    <span class="language-chevron" aria-hidden="true">
+      ⌄
+    </span>
+  </summary>
+  <div class="language-list modern-language-list">
+    <div class="language-picker-heading">
+      <strong>{copy.language}</strong>
+      <span>{localeRegistry.length}</span>
+    </div>
+    <div class="language-options" data-i18n-ignore>
+      {options.map(({ code, name }) => (
+        <div class="language-option">
+          <a
+            href={localePath(code, currentPage)}
+            data-language-link={code}
+            lang={locale}
+            dir="ltr"
+            aria-current={code === locale ? 'page' : undefined}
+          >
+            <img
+              class="language-flag"
+              src={`/flags/${countries[code]}.svg`}
+              width="24"
+              height="16"
+              alt=""
+              loading="eager"
+            />
+            <span class="language-option-name">
+              <span class="language-option-label">{name}</span>
+              <small lang="en" dir="ltr">
+                {code}
+              </small>
+            </span>
+            <span class="language-selected-mark" aria-hidden="true">
+              {code === locale ? '✓' : '↗'}
+            </span>
+          </a>
+        </div>
+      ))}
+    </div>
+  </div>
+</details>
+<style is:global>
+  .modern-language-picker summary {
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+    transition:
+      background 0.2s,
+      border-color 0.2s;
+  }
+  .modern-language-picker summary:hover,
+  .modern-language-picker[open] summary {
+    background: #ffffff12;
+    border-color: #ffffff38;
+  }
+  .modern-language-picker summary .selected-language-name,
+  .modern-language-picker summary .language-chevron {
+    display: none;
+  }
+  .language-flag {
+    width: 24px;
+    height: 16px;
+    object-fit: cover;
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px #ffffff26;
+    flex-shrink: 0;
+  }
+  .language-chevron {
+    margin-inline-start: 4px;
+    color: #c9cbd4;
+    transition: transform 0.2s;
+  }
+  .modern-language-picker[open] .language-chevron {
+    transform: rotate(180deg);
+  }
+  .modern-language-list {
+    width: 322px;
+    padding: 14px;
+    border: 1px solid #ffffff2b;
+    border-radius: 16px;
+    background: #171a21;
+    box-shadow: 0 24px 64px #000b;
+    max-height: min(75dvh, 570px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .language-picker-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px;
+    font-size: 12px;
+  }
+  .language-picker-heading > span {
+    font-size: 10px;
+    color: #b9bdc9;
+    background: #ffffff0c;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .language-options {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    min-height: 0;
+  }
+  .modern-language-list .language-option > a {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 10px;
+    border-radius: 7px;
+    min-height: 51px;
+  }
+  .modern-language-list .language-option > a:hover {
+    background: #ffffff17;
+  }
+  .modern-language-list .language-option > a[aria-current='page'] {
+    background: #d0002420;
+    box-shadow: inset 3px 0 var(--red);
+  }
+  .modern-language-list .language-option > a[aria-current='page'] > span {
+    color: #fff;
+  }
+  .language-option-name {
+    font-size: 13px;
+    line-height: 1.4;
+    flex: 1;
+    color: #f0f1f5;
+  }
+  .language-option-name small {
+    display: block;
+    font-size: 9px;
+    color: #a9afbc;
+    margin-top: 2px;
+  }
+  .language-selected-mark {
+    color: #fff;
+    font-size: 13px;
+  }
+  @media (max-width: 1280px) and (min-width: 1101px) {
+    .modern-language-picker summary {
+      width: 40px;
+      height: 40px;
+    }
+  }
+  @media (max-width: 760px) {
+    .modern-language-picker summary {
+      width: 42px;
+      height: 42px;
+    }
+    .modern-language-list {
+      position: fixed;
+      inset: calc(var(--header-height) + 8px) 16px auto;
+      width: auto;
+      max-height: calc(100dvh - var(--header-height) - 25px);
+    }
+    .contact-screen .header-actions,
+    .header-actions {
+      gap: 10px;
+    }
+  }
+  @media (max-width: 420px) {
+    .header-inner > .brand {
+      width: 145px;
+    }
+    .header-inner > .brand img {
+      width: 186px;
+    }
+    .modern-language-picker summary .language-flag {
+      width: 21px;
+      height: 14px;
+    }
+    .selected-language-name {
+      max-width: 90px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+</style>

@@ -1,0 +1,228 @@
+---
+import Icon from '../ui/Icon.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { t } from '../../i18n/ui';
+import { homePath, navPath, withoutLocale, trPaths, type Locale } from '../../i18n/locales';
+import { serviceGroups, corporate } from '../../data/site';
+interface Props {
+  locale: Locale;
+  home?: boolean;
+}
+const { locale, home = false } = Astro.props;
+const copy = t(locale);
+const currentPath = withoutLocale(Astro.url.pathname);
+const activeIndex = home
+  ? 0
+  : trPaths.findIndex((slug, i) => i > 0 && currentPath.startsWith(`/${slug}/`));
+const mobileNavIcons = ['home', 'building', 'toolbox', 'workflow', 'grid', 'users', 'book', 'chat'];
+---
+
+<header class:list={['site-header', { 'site-header--home': home }]} id="top">
+  <div class="header-inner">
+    <a href={homePath(locale)} class="brand" aria-label="Algebra Teknoloji">
+      <img
+        src="/brand/algebra-display.webp"
+        alt="Algebra Teknoloji"
+        width="1672"
+        height="941"
+        fetchpriority="high"
+      />
+    </a>
+    <nav class="desktop-nav" aria-label={copy.menu}>
+      {copy.nav.map((label, i) => (
+        <div class:list={['nav-item', { 'has-mega': i === 1 || i === 2 }]}>
+          <a
+            href={navPath(locale, i)}
+            class:list={{ active: i === activeIndex }}
+            aria-current={i === activeIndex ? 'page' : undefined}
+          >
+            {label}
+          </a>
+          {(i === 1 || i === 2) && (
+            <div class="mega-menu">
+              <span class="eyebrow">{label}</span>
+              <div class="mega-grid">
+                {i === 2
+                  ? serviceGroups.map((g, index) => (
+                      <a href={`/hizmetler/#${g.id}`}>
+                        <Icon name={['code', 'server', 'sun', 'layers'][index]} />
+                        <span>
+                          {g.title}
+                          <small>{g.intro}</small>
+                        </span>
+                        <Icon name="diagonal" size={15} />
+                      </a>
+                    ))
+                  : corporate.map((p, index) => (
+                      <a href={`/${p.slug}/`}>
+                        <Icon
+                          name={
+                            [
+                              'globe',
+                              'layers',
+                              'shield',
+                              'check',
+                              'server',
+                              'sun',
+                            ][index]
+                          }
+                        />
+                        <span>{p.title}</span>
+                        <Icon name="diagonal" size={15} />
+                      </a>
+                    ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </nav>
+    <div class="header-actions">
+      <LanguageSwitcher locale={locale} home={home} />
+      <button
+        class="mobile-toggle icon-button"
+        aria-label={copy.menu}
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+        data-open-label={copy.menu}
+        data-close-label={copy.close}
+      >
+        <span class="menu-glyph" aria-hidden="true"><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobile-nav" aria-label={copy.menu} inert>
+    {copy.nav.map((label, i) => (
+      <a href={navPath(locale, i)} class:list={{ active: i === activeIndex }} aria-current={i === activeIndex ? 'page' : undefined}>
+        <span class="mobile-nav-icon"><Icon name={mobileNavIcons[i]} size={20} /></span>
+        {label}
+        <Icon name="diagonal" size={17} />
+      </a>
+    ))}
+  </nav>
+</header>
+<script>
+  const header = document.querySelector<HTMLElement>('.site-header');
+  if (header) {
+    const updateHeader = () => header.classList.toggle('is-scrolled', window.scrollY > 12);
+    updateHeader();
+    window.addEventListener('scroll', updateHeader, { passive: true });
+  }
+  const toggle = document.querySelector<HTMLButtonElement>('.mobile-toggle');
+  const nav = document.querySelector<HTMLElement>('.mobile-nav');
+  function closeMenu() {
+    toggle?.setAttribute('aria-expanded', 'false');
+    toggle?.setAttribute('aria-label', toggle.dataset.openLabel || '');
+    nav?.setAttribute('inert', '');
+    document.body.classList.remove('menu-open');
+  }
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') !== 'true';
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute(
+      'aria-label',
+      open ? toggle.dataset.closeLabel || '' : toggle.dataset.openLabel || '',
+    );
+    nav?.toggleAttribute('inert', !open);
+    document.body.classList.toggle('menu-open', open);
+    if (open) nav?.querySelector('a')?.focus();
+  });
+  nav?.querySelectorAll('a').forEach((a) => a.addEventListener('click', closeMenu));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const wasOpen = toggle?.getAttribute('aria-expanded') === 'true';
+      closeMenu();
+      if (wasOpen) toggle?.focus();
+      document.querySelectorAll<HTMLDetailsElement>('details.language-picker').forEach((d) => {
+        if (d.open && d.contains(document.activeElement)) d.querySelector('summary')?.focus();
+        d.open = false;
+      });
+    }
+    if (e.key === 'Tab' && toggle?.getAttribute('aria-expanded') === 'true') {
+      const links = Array.from(nav?.querySelectorAll<HTMLAnchorElement>('a') || []);
+      const last = links.at(-1);
+      if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        toggle.focus();
+      } else if (e.shiftKey && document.activeElement === toggle) {
+        e.preventDefault();
+        last?.focus();
+      }
+    }
+  });
+  document.addEventListener('click', (e) =>
+    document.querySelectorAll<HTMLDetailsElement>('details.language-picker').forEach((d) => {
+      if (!d.contains(e.target as Node)) d.open = false;
+    }),
+  );
+</script>
+<style is:global>
+  @media (max-width: 1100px) {
+    .header-actions .mobile-toggle {
+      width: 44px;
+      height: 44px;
+      border: 1px solid #ffffff36;
+      border-radius: 12px;
+      background: #11151dcc;
+      justify-content: center;
+      align-items: center;
+    }
+    .menu-glyph {
+      display: grid;
+      gap: 6px;
+      width: 19px;
+    }
+    .menu-glyph > span {
+      display: block;
+      width: 100%;
+      height: 1.5px;
+      border-radius: 2px;
+      background: #fff;
+      transition: transform 0.2s ease;
+    }
+    .mobile-toggle[aria-expanded='true'] .menu-glyph > span:first-child {
+      transform: translateY(3.75px) rotate(45deg);
+    }
+    .mobile-toggle[aria-expanded='true'] .menu-glyph > span:last-child {
+      transform: translateY(-3.75px) rotate(-45deg);
+    }
+    .mobile-nav {
+      background: #0b0e15f7;
+      backdrop-filter: blur(18px);
+    }
+    .mobile-nav a {
+      gap: 17px;
+      min-height: 68px;
+      padding-block: 12px;
+      font-size: clamp(18px, 2.5vw, 23px);
+    }
+    .mobile-nav a > .mobile-nav-icon {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      border: 1px solid #d000244f;
+      border-radius: 11px;
+      background: #d0002417;
+      color: #f1f2f5;
+    }
+    .mobile-nav a:hover > .mobile-nav-icon,
+    .mobile-nav a:focus-visible > .mobile-nav-icon,
+    .mobile-nav a.active > .mobile-nav-icon {
+      border-color: #d00024;
+      background: #d0002429;
+      color: #fff;
+    }
+  }
+  @media (max-width: 420px) {
+    .header-actions .mobile-toggle {
+      width: 40px;
+      height: 40px;
+    }
+    .mobile-nav a {
+      min-height: 61px;
+      font-size: 18px;
+    }
+  }
+</style>

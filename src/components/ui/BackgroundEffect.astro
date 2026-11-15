@@ -1,0 +1,14 @@
+---
+interface Props {
+  mode: 'crt' | 'laser' | 'arc' | 'particles' | 'knowledge';
+}
+const { mode } = Astro.props;
+---
+
+<div class={`background-effect background-effect--${mode}`} data-background-effect={mode} aria-hidden="true">
+  <canvas></canvas>
+</div>
+
+<script>
+  import '../../lib/background-effects';
+</script>

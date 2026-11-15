@@ -1,0 +1,139 @@
+---
+import '../styles/global.css';
+import '../styles/i18n.css';
+import SiteHeader from '../components/navigation/SiteHeader.astro';
+import SiteFooter from '../components/layout/SiteFooter.astro';
+import { t } from '../i18n/ui';
+import { publishedLocales, localePath, localeFromPath, type Locale } from '../i18n/locales';
+import { companyContact } from '../data/contact';
+import { brand } from '../data/brand';
+interface Props {
+  title?: string;
+  description?: string;
+  locale?: Locale;
+  home?: boolean;
+  noindex?: boolean;
+  schema?: Record<string, unknown>;
+  showFooter?: boolean;
+  bodyClass?: string;
+}
+const {
+  title,
+  description,
+  locale = localeFromPath(Astro.url.pathname),
+  home = false,
+  noindex = false,
+  schema,
+  showFooter = true,
+  bodyClass,
+} = Astro.props;
+const copy = t(locale),
+  canonical = new URL(Astro.url.pathname, Astro.site);
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Algebra Teknoloji',
+  url: Astro.site?.href,
+  logo: new URL('/brand/algebra-logo.jpeg', Astro.site).href,
+  telephone: companyContact.telephone,
+  email: companyContact.email,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: companyContact.streetAddress,
+    addressLocality: companyContact.district,
+    addressRegion: companyContact.city,
+    postalCode: companyContact.postalCode,
+    addressCountry: companyContact.country,
+  },
+};
+---
+
+<!doctype html>
+<html
+  lang={locale}
+  dir={locale === 'ar' ? 'rtl' : 'ltr'}
+  style={`--red:${brand.red};--red-hover:${brand.redHover}`}
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#050505" />
+    <title>{title?`${title} | Algebra Teknoloji`:copy.meta}</title>
+    <meta name="description" content={description || copy.metaDesc} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    {!noindex &&
+      publishedLocales.map((l) => (
+        <link
+          rel="alternate"
+          hreflang={l}
+          href={new URL(localePath(l, Astro.url.pathname), Astro.site)}
+        />
+      ))}
+    {!noindex && (
+      <link
+        rel="alternate"
+        hreflang="x-default"
+        href={new URL(localePath('tr', Astro.url.pathname), Astro.site)}
+      />
+    )}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Algebra Teknoloji" />
+    <meta property="og:title" content={title || copy.meta} />
+    <meta property="og:description" content={description || copy.metaDesc} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL('/og-image.jpg', Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:locale"
+      content={
+        {
+          tr: 'tr_TR',
+          en: 'en_GB',
+          ar: 'ar_SA',
+          de: 'de_DE',
+          fr: 'fr_FR',
+          'zh-CN': 'zh_CN',
+          ja: 'ja_JP',
+          ru: 'ru_RU',
+          it: 'it_IT',
+          es: 'es_ES',
+        }[locale]
+      }
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title || copy.meta} />
+    <meta name="twitter:description" content={description || copy.metaDesc} />
+    <meta name="twitter:image" content={new URL('/og-image.jpg', Astro.site)} />
+    <link rel="icon" href="/brand/favicon-display.webp" type="image/webp" />
+    <link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+    {['tr', 'de', 'fr', 'ru', 'it', 'es'].includes(locale) && (
+      <link
+        rel="preload"
+        href="/fonts/manrope-latin-ext.woff2"
+        as="font"
+        type="font/woff2"
+        crossorigin
+      />
+    )}
+    <script type="application/ld+json" set:html={JSON.stringify(organization)} />
+    {schema && (
+      <script
+        type="application/ld+json"
+        set:html={JSON.stringify(schema).replace(/</g, '\\u003c')}
+      />
+    )}
+  </head>
+  <body class={bodyClass}>
+    <a class="skip-link" href="#main">
+      {copy.skip}
+    </a>
+    <SiteHeader locale={locale} home={home} />
+    <main id="main">
+      <slot />
+    </main>
+    {showFooter && <SiteFooter locale={locale} />}
+  </body>
+</html>

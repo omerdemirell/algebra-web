@@ -1,0 +1,328 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../hero/PageHero.astro';
+import SectionHeading from './SectionHeading.astro';
+import CTASection from './CTASection.astro';
+import ContentCard from '../cards/ContentCard.astro';
+import ContactScene from '../sections/ContactScene.astro';
+import FAQAccordion from '../ui/FAQAccordion.astro';
+import Icon from '../ui/Icon.astro';
+import { Image } from 'astro:assets';
+import { imageFor, imageFocusFor } from '../../lib/images';
+import {
+  services,
+  serviceGroups,
+  solutions,
+  corporate,
+  sectors,
+  careers,
+  articles,
+  hubPages,
+} from '../../data/site';
+import { faq } from '../../data/pages';
+interface Props {
+  page: (typeof hubPages)[number];
+}
+const { page } = Astro.props;
+const heroImage =
+  page.type === 'services'
+    ? 'datacenter'
+    : page.type === 'sectors'
+      ? 'sectorsOverview'
+      : page.type === 'careers'
+        ? 'careers'
+        : page.type === 'corporate'
+          ? 'engineering'
+        : 'hero';
+---
+
+<BaseLayout
+  title={page.eyebrow}
+  description={page.description}
+  showFooter={page.type !== 'contact'}
+  bodyClass={page.type === 'contact' ? 'contact-screen' : undefined}
+>
+  {page.type !== 'contact' && (
+    <PageHero
+      title={page.title}
+      description={page.description}
+      eyebrow={page.eyebrow}
+      image={heroImage}
+      slug={page.slug}
+      knowledgeField={page.slug === 'bilgi-merkezi'}
+    />
+  )}
+  {page.type === 'services' && (
+    <section class="section-space">
+      <div class="container">
+        <div class="service-search">
+          <label for="service-search">İhtiyacınız olan hizmeti bulun</label>
+          <div>
+            <Icon name="layers" />
+            <input
+              id="service-search"
+              type="search"
+              placeholder="Yazılım, veri merkezi, enerji…"
+              data-service-search
+              aria-controls="service-catalog"
+            />
+            <span class="search-count" aria-live="polite" data-count-label="{count} hizmet">
+              43 hizmet
+            </span>
+          </div>
+        </div>
+        <nav class="category-nav" aria-label="Hizmet kategorileri">
+          {serviceGroups.map((g, i) => (
+            <a href={`#${g.id}`}>
+              <span>0{i + 1}</span>
+              {g.title}
+              <Icon name="diagonal" size={16} />
+            </a>
+          ))}
+        </nav>
+        <div id="service-catalog">
+          {serviceGroups.map((group, i) => (
+            <section class="service-group" id={group.id} data-service-group>
+              <div class="service-group-intro">
+                <span class="eyebrow">0{i + 1} / UZMANLIK ALANI</span>
+                <h2>{group.title}</h2>
+                <p>{group.intro}</p>
+                <Image
+                  src={imageFor(group.image)}
+                  alt=""
+                  widths={[400, 700]}
+                  sizes="(max-width: 760px) 100vw, 35vw"
+                  format="webp"
+                  width={700}
+                  loading="lazy"
+                  style={imageFocusFor(group.image) ? `object-position: ${imageFocusFor(group.image)}` : undefined}
+                />
+              </div>
+              <div class="service-list">
+                {services
+                  .filter((s) => s.category === group.id)
+                  .map((s, index) => (
+                    <a
+                      href={`/${s.slug}/`}
+                      data-service-item
+                      data-search={`${s.title} ${s.description}`}
+                    >
+                      <span class="service-list-index">{String(index + 1).padStart(2, '0')}</span>
+                      <div>
+                        <h3>{s.title}</h3>
+                        <p>{s.description}</p>
+                      </div>
+                      <Icon name="diagonal" />
+                    </a>
+                  ))}
+              </div>
+            </section>
+          ))}
+        </div>
+        <p class="search-empty" hidden>
+          Aramanızla eşleşen bir hizmet bulunamadı. Farklı bir sözcük deneyin.
+        </p>
+      </div>
+    </section>
+  )}
+  {page.type === 'solutions' && (
+    <section class="section-space">
+      <div class="container">
+        <SectionHeading
+          eyebrow="BÜTÜNLEŞİK YAKLAŞIM"
+          title="Bir problemin, birden çok boyutu var."
+          description="Sistemleri tek tek değil, birlikte nasıl çalıştıkları üzerinden değerlendiriyoruz. Her çözüm farklı hizmetleri ortak bir iş hedefine bağlar."
+        />
+        <div class="solution-catalog">
+          {solutions.map((p, i) => (
+            <ContentCard
+              title={p.title}
+              description={p.description}
+              href={`/${p.slug}/`}
+              index={i}
+              compact
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+  {page.type === 'corporate' && (
+    <>
+      <section class="section-space">
+        <div class="container corporate-intro">
+          <span class="eyebrow">
+            <i></i>ALGEBRA TEKNOLOJİ
+          </span>
+          <div>
+            <h2>
+              Farklı disiplinlerin
+              <br />
+              kesiştiği yerdeyiz.
+            </h2>
+            <p>
+              Yazılım, bilişim altyapıları, enerji ve mühendisliği aynı masada buluşturuyoruz.
+              Teknolojiye yaklaşımımızı, değerlerimizi ve sürdürülebilirlik bakışımızı keşfedin.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section class="container corporate-catalog">
+        {corporate.map((p, i) => (
+          <ContentCard
+            title={p.title}
+            description={p.description}
+            image={i === 0 || i === 6 ? p.image : undefined}
+            href={`/${p.slug}/`}
+            index={i}
+            compact={i !== 0 && i !== 6}
+          />
+        ))}
+      </section>
+    </>
+  )}
+  {page.type === 'sectors' && (
+    <section class="section-space">
+      <div class="container">
+        <SectionHeading
+          eyebrow="İŞİNİZİN DİNAMİKLERİ"
+          title={'Aynı teknoloji.\nFarklı öncelikler.'}
+          description="Kurumun çalışma biçimi, veri hassasiyeti ve süreklilik gereksinimleri; doğru çözümün başlangıç noktasıdır."
+        />
+        <div class="sector-catalog sector-overview-grid">
+          {sectors.map((p, i) => (
+            <a href={`/${p.slug}/`}>
+              <Image
+                class="sector-catalog-image"
+                src={imageFor(p.image)}
+                alt=""
+                widths={[640, 900, 1400]}
+                sizes="(max-width: 600px) 100vw, 50vw"
+                format="webp"
+                quality={90}
+                loading={i < 5 ? 'eager' : 'lazy'}
+              />
+              <span class="sector-catalog-index">{String(i + 1).padStart(2, '0')}</span>
+              <div class="sector-catalog-copy">
+                <h2>{p.title}</h2>
+                <p>{p.description}</p>
+              </div>
+              <Icon name="diagonal" size={20} />
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+  {page.type === 'careers' && (
+    <section class="section-space">
+      <div class="container">
+        <div class="career-intro">
+          <span class="eyebrow">
+            <i></i>BİRLİKTE ÖĞRENMEK
+          </span>
+          <h2>
+            İyi sorular soran
+            <br />
+            insanlara alan açıyoruz.
+          </h2>
+          <p>
+            Farklı uzmanlıkların aynı hedef etrafında buluşmasını önemsiyoruz. Çalışma
+            yaklaşımımızı, kariyer ve staj alanlarını tanıyın.
+          </p>
+        </div>
+        <div class="cards-grid">
+          {careers.map((p, i) => (
+            <ContentCard
+              title={p.title}
+              description={p.description}
+              href={`/${p.slug}/`}
+              index={i}
+              compact
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+  {page.type === 'insights' && (
+    <section class="section-space">
+      <div class="container">
+        <nav class="insight-tabs" aria-label="İçerik türleri">
+          {[
+            ['Blog', 'blog'],
+            ['Teknik Makaleler', 'teknik-makaleler'],
+            ['Haberler', 'haberler'],
+            ['Duyurular', 'duyurular'],
+            ['Sık Sorulan Sorular', 'sik-sorulan-sorular'],
+          ].map(([name, slug]) => (
+            <a href={`/bilgi-merkezi/${slug}/`}>{name}</a>
+          ))}
+        </nav>
+        <div class="featured-article">
+          <ContentCard
+            title={articles[0]!.title}
+            description={articles[0]!.description}
+            image={articles[0]!.image}
+            href={`/${articles[0]!.slug}/`}
+            tag="BİLİŞİM & ALTYAPI"
+          />
+        </div>
+        <div class="cards-grid">
+          {articles.slice(1).map((p, i) => (
+            <ContentCard
+              title={p.title}
+              description={p.description}
+              image={p.image}
+              href={`/${p.slug}/`}
+              tag={i === 0 ? 'ENERJİ & SÜRDÜRÜLEBİLİRLİK' : 'DİJİTAL DÖNÜŞÜM'}
+            />
+          ))}
+        </div>
+        <p class="editorial-note">
+          Bilgi merkezi içerikleri genel teknik bilgilendirme amacı taşır; bir müşteri uygulaması
+          veya şirket başarı hikâyesi anlatmaz.
+        </p>
+      </div>
+    </section>
+  )}
+  {page.type === 'faq' && (
+    <section class="section-space">
+      <div class="container narrow">
+        <FAQAccordion items={faq} />
+      </div>
+    </section>
+  )}
+  {page.type === 'contact' && <ContactScene />}
+  {page.type !== 'contact' && <CTASection />}
+</BaseLayout>
+<script>
+  const input = document.querySelector<HTMLInputElement>('[data-service-search]');
+  input?.addEventListener('input', () => {
+    const language = document.documentElement.lang;
+    const normalize = (value: string) =>
+      value.normalize('NFKD').replace(/\p{M}/gu, '').toLocaleLowerCase(language);
+    const query = normalize(input.value.trim());
+    let count = 0;
+    document.querySelectorAll<HTMLElement>('[data-service-group]').forEach((group) => {
+      let groupCount = 0;
+      group.querySelectorAll<HTMLElement>('[data-service-item]').forEach((item) => {
+        const match = normalize(item.textContent || '').includes(query);
+        item.hidden = !match;
+        if (match) {
+          count++;
+          groupCount++;
+        }
+      });
+      group.hidden = groupCount === 0;
+    });
+    const result = document.querySelector('.search-count');
+    if (result instanceof HTMLElement)
+      result.textContent = (result.dataset.countLabel || '{count}').replace(
+        '{count}',
+        new Intl.NumberFormat(language).format(count),
+      );
+    const empty = document.querySelector<HTMLElement>('.search-empty');
+    if (empty) empty.hidden = count > 0;
+  });
+</script>

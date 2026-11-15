@@ -1,0 +1,23 @@
+---
+import BackgroundEffect from '../ui/BackgroundEffect.astro';
+
+const terms = [
+  'Dijital Dönüşüm',
+  'Siber Güvenlik',
+  'Enerji',
+  'İş Sürekliliği',
+  'Veri Yedekleme',
+  'Sistem İzleme',
+];
+---
+
+<div class="knowledge-field" aria-hidden="true">
+  <BackgroundEffect mode="knowledge" />
+  <div class="knowledge-field-terms">
+    {terms.map((term, index) => (
+      <span class={`knowledge-term knowledge-term--${index + 1}`}>
+        <span>{term}</span>
+      </span>
+    ))}
+  </div>
+</div>

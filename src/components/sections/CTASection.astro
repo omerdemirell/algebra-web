@@ -1,0 +1,28 @@
+---
+import Icon from '../ui/Icon.astro';
+import { t } from '../../i18n/ui';
+import { type Locale } from '../../i18n/locales';
+const { locale = 'tr' } = Astro.props as { locale?: Locale };
+const copy = t(locale);
+---
+
+<section class="cta-section" id="contact">
+  <div class="container cta-inner">
+    <div>
+      <span class="eyebrow">
+        <i></i>
+        {copy.contactEye}
+      </span>
+      <h2>
+        {copy.contactTitle.split('\n').map((line) => (
+          <span class="line">{line}</span>
+        ))}
+      </h2>
+      <p>{copy.contactDesc}</p>
+    </div>
+    <a class="cta-circle" href="/iletisim/">
+      <Icon name="diagonal" size={45} />
+      <span>{copy.contactAction}</span>
+    </a>
+  </div>
+</section>
