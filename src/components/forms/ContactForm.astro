@@ -146,6 +146,7 @@ const careerButton: Record<string, string> = {
       const result = form.querySelector<HTMLElement>('.form-result')!;
       result.textContent = (formMessages[document.documentElement.lang] || formMessages.tr).unavailable;
       result.classList.add('visible');
+      form.addEventListener('submit', (event) => event.preventDefault());
       return;
     }
     button.disabled = false;
